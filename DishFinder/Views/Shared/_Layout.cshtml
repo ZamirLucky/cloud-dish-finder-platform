@@ -25,6 +25,40 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Upload" asp-action="Index">Upload</a>
+                            </li>                          
+                        }                       
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            var profilePic = User.FindFirst("picture")?.Value;
+                            var name = User.Identity?.Name ?? User.FindFirst("email")?.Value ?? "User";
+
+                            <li class="nav-item d-flex align-items-center me-3">
+                                @if (!string.IsNullOrEmpty(profilePic))
+                                {
+                                    // referrerpolicy="no-referrer" is used to prevent Google server 403 errors when requesting the image
+                                    <img src="@profilePic" alt="Profile" class="rounded-circle me-2" style="width: 32px; height: 32px;" referrerpolicy="no-referrer" />
+                                }
+                                <span class="text-dark fw-medium">@name</span>
+                            </li>
+                            <li class="nav-item d-flex align-items-center">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="nav-link btn btn-link text-dark border-0 p-0">Logout</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login with Google</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
