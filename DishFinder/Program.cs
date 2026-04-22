@@ -1,8 +1,9 @@
-using System.Security.Claims;
+using DishFinder.Interfaces;
+using DishFinder.Services;
 using Google.Cloud.SecretManager.V1;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
-using DishFinder.Services;
+using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,6 +50,8 @@ builder.Services
             return Task.CompletedTask;
         };
     });
+
+builder.Services.AddScoped<IBucketStorageService, BucketStorageService>();
 
 var app = builder.Build();
 
