@@ -1,5 +1,7 @@
+using DishFinder.DataAccess;
 using DishFinder.Interfaces;
 using DishFinder.Services;
+using Google.Cloud.Firestore;
 using Google.Cloud.SecretManager.V1;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -51,7 +53,14 @@ builder.Services
         };
     });
 
+builder.Services.AddSingleton(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    return FirestoreDb.Create(projectId);
+});
+
 builder.Services.AddScoped<IBucketStorageService, BucketStorageService>();
+builder.Services.AddScoped<IFirestoreMenuRepository, FirestoreMenuRepository>();
 
 var app = builder.Build();
 
