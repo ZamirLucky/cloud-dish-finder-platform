@@ -22,5 +22,7 @@ namespace DishFinder.Interfaces
             string menuId,
             StorageUploadResultModel uploadResult,
             string uploadedBy);
+
+        Task<List<RestaurantOptionViewModel>> GetRestaurantsAsync();
     }
 }
