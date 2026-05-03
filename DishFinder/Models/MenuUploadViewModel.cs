@@ -14,8 +14,8 @@ namespace DishFinder.Models
         public string MenuTitle { get; set; } = string.Empty;
 
         [Required]
-        [Display(Name = "Menu image")]
-        public IFormFile? MenuImage { get; set; }
+        [Display(Name = "Menu images")]
+        public List<IFormFile> MenuImages { get; set; } = new();
 
         public List<SelectListItem> Restaurants { get; set; } = new();
 

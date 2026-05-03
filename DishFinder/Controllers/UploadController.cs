@@ -35,9 +35,9 @@ namespace DishFinder.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(MenuUploadViewModel model)
         {
-            if (model.MenuImage == null || model.MenuImage.Length == 0)
+            if (model.MenuImages == null || model.MenuImages.Count == 0)
             {
-                ModelState.AddModelError(nameof(model.MenuImage), "Please select one image.");
+                ModelState.AddModelError(nameof(model.MenuImages), "Please select at least one image.");
             }
 
             if (!ModelState.IsValid)
@@ -55,31 +55,35 @@ namespace DishFinder.Controllers
                 menuTitle: model.MenuTitle.Trim(),
                 ocrText: "",
                 status: "pending");
-
-            var uploadResult = await _bucketStorageService.UploadMenuImageAsync(
-                model.MenuImage!,
-                model.RestaurantId,
-                menuId);
-
             string uploadedBy =
                 User.FindFirst("email")?.Value
                 ?? User.Identity?.Name
                 ?? "unknown";
 
-            string imageId = await _firestoreMenuRepository.AddImageReferenceAsync(
-                restaurantId: model.RestaurantId,
-                menuId: menuId,
-                uploadResult: uploadResult,
-                uploadedBy: uploadedBy);
+            int uploadedCount = 0;
 
-            // Log the upload result and menu details
-            _logger.LogInformation(
-                "Menu created, image uploaded, and image reference saved. RestaurantId={RestaurantId}, MenuId={MenuId}, ImageId={ImageId}",
-                model.RestaurantId,
-                menuId,
-                imageId);
+            foreach (var file in model.MenuImages)
+            {
+                if (file == null || file.Length == 0)
+                {
+                    continue;
+                }
 
-            TempData["SuccessMessage"] = "Menu created and image uploaded successfully.";
+                var uploadResult = await _bucketStorageService.UploadMenuImageAsync(
+                    file,
+                    model.RestaurantId,
+                    menuId);
+
+                await _firestoreMenuRepository.AddImageReferenceAsync(
+                    restaurantId: model.RestaurantId,
+                    menuId: menuId,
+                    uploadResult: uploadResult,
+                    uploadedBy: uploadedBy);
+
+                uploadedCount++;
+            }
+
+            TempData["SuccessMessage"] = $"{uploadedCount} image(s) uploaded successfully.";
 
             return RedirectToAction(nameof(Create));
 

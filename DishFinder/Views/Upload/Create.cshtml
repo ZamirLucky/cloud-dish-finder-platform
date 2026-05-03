@@ -29,9 +29,13 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="MenuImage" class="form-label"></label>
-        <input asp-for="MenuImage" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif" />
-        <span asp-validation-for="MenuImage" class="text-danger"></span>
+        <label asp-for="MenuImages" class="form-label"></label>
+        <input asp-for="MenuImages"
+               type="file"
+               class="form-control"
+               accept=".jpg,.jpeg,.png,.gif"
+               multiple />
+        <span asp-validation-for="MenuImages" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Continue</button>

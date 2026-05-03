@@ -53,6 +53,8 @@ namespace DishFinder.Controllers
             return RedirectToAction(nameof(Create));
         }
 
+        // Generates a unique restaurant ID by combining the name and address, converting to lowercase, and replacing non-alphanumeric characters with hyphens.
+        //  If the resulting ID is empty, a new GUID is used.
         private static string BuildRestaurantId(string name, string address)
         {
             string raw = $"{name}-{address}".ToLowerInvariant().Trim();
