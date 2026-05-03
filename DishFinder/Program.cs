@@ -61,6 +61,7 @@ builder.Services.AddSingleton(provider =>
 
 builder.Services.AddScoped<IBucketStorageService, BucketStorageService>();
 builder.Services.AddScoped<IFirestoreMenuRepository, FirestoreMenuRepository>();
+builder.Services.AddScoped<IPubSubPublisherService, PubSubPublisherService>();
 
 var app = builder.Build();
 

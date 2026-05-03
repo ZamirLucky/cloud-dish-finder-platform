@@ -9,16 +9,19 @@ namespace DishFinder.Controllers
     {
         private readonly IBucketStorageService _bucketStorageService;
         private readonly IFirestoreMenuRepository _firestoreMenuRepository;
+        private readonly IPubSubPublisherService _pubSubPublisherService;
         private readonly ILogger<UploadController> _logger;
 
         public UploadController(
             IFirestoreMenuRepository firestoreMenuRepository, 
             ILogger<UploadController> logger,
-            IBucketStorageService bucketStorageService)
+            IBucketStorageService bucketStorageService,
+            IPubSubPublisherService pubSubPublisherService)
         {
             _firestoreMenuRepository = firestoreMenuRepository;
             _logger = logger;
             _bucketStorageService = bucketStorageService;
+            _pubSubPublisherService = pubSubPublisherService;
         }
 
         // GET: Upload/Create (renders the upload page and restaurant dropdown)
@@ -82,6 +85,18 @@ namespace DishFinder.Controllers
                 menuId: model.MenuId,
                 uploadResult: uploadResult,
                 uploadedBy: uploadedBy);
+
+            // Publish a Pub/Sub message to trigger the uploaded menu image/s
+            await _pubSubPublisherService.PublishMenuUploadAsync(new MenuUploadMessageModel
+            {
+                RestaurantId = model.RestaurantId,
+                MenuId = model.MenuId,
+                ImageId = imageId,
+                BucketName = uploadResult.BucketName,
+                ObjectName = uploadResult.ObjectName,
+                GsUri = uploadResult.GsUri,
+                UploadedBy = uploadedBy
+            });
 
             return Json(new
             {
