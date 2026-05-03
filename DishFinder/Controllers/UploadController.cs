@@ -21,7 +21,7 @@ namespace DishFinder.Controllers
             _bucketStorageService = bucketStorageService;
         }
 
-        // GET: Upload/Create
+        // GET: Upload/Create (renders the upload page and restaurant dropdown)
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -30,23 +30,16 @@ namespace DishFinder.Controllers
             return View(model);
         }
 
-        // Post: Upload/create
+        // AJAX step 1: create/persist a new Menu record and return its generated `menuId`.
+        // Images are uploaded in a separate request so the UI can show per-file progress.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(MenuUploadViewModel model)
+        public async Task<IActionResult> StartMenuUpload([FromForm] StartMenuUploadRequestModel model)
         {
-            if (model.MenuImages == null || model.MenuImages.Count == 0)
-            {
-                ModelState.AddModelError(nameof(model.MenuImages), "Please select at least one image.");
+            if (!ModelState.IsValid){
+                    return BadRequest(new { success = false, message = "Invalid menu upload request." });
             }
-
-            if (!ModelState.IsValid)
-            {
-                await PopulateRestaurantsAsync(model);
-                return View(model);
-            }
-
-            // create menu, upload image, save image reference
+            
             string menuId = Guid.NewGuid().ToString("N");
 
             await _firestoreMenuRepository.CreateOrUpdateMenuAsync(
@@ -55,41 +48,51 @@ namespace DishFinder.Controllers
                 menuTitle: model.MenuTitle.Trim(),
                 ocrText: "",
                 status: "pending");
+
+            return Json(new
+            {
+                success = true,
+                menuId = menuId
+            });
+        }
+
+        // AJAX step 2: upload one image to Cloud Storage, then write an image document under:
+        // `restaurants/{restaurantId}/menus/{menuId}/images`.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadSingleImage([FromForm] UploadSingleImageRequestModel model)
+        {
+            if (!ModelState.IsValid || model.File == null || model.File.Length == 0)
+            {
+                return BadRequest(new { success = false, message = "Invalid file upload request." });
+            }
+
+            var uploadResult = await _bucketStorageService.UploadMenuImageAsync(
+                model.File,
+                model.RestaurantId,
+                model.MenuId);
+
             string uploadedBy =
                 User.FindFirst("email")?.Value
                 ?? User.Identity?.Name
                 ?? "unknown";
 
-            int uploadedCount = 0;
+            string imageId = await _firestoreMenuRepository.AddImageReferenceAsync(
+                restaurantId: model.RestaurantId,
+                menuId: model.MenuId,
+                uploadResult: uploadResult,
+                uploadedBy: uploadedBy);
 
-            foreach (var file in model.MenuImages)
+            return Json(new
             {
-                if (file == null || file.Length == 0)
-                {
-                    continue;
-                }
-
-                var uploadResult = await _bucketStorageService.UploadMenuImageAsync(
-                    file,
-                    model.RestaurantId,
-                    menuId);
-
-                await _firestoreMenuRepository.AddImageReferenceAsync(
-                    restaurantId: model.RestaurantId,
-                    menuId: menuId,
-                    uploadResult: uploadResult,
-                    uploadedBy: uploadedBy);
-
-                uploadedCount++;
-            }
-
-            TempData["SuccessMessage"] = $"{uploadedCount} image(s) uploaded successfully.";
-
-            return RedirectToAction(nameof(Create));
-
+                success = true,
+                imageId = imageId,
+                fileName = uploadResult.OriginalFileName,
+                objectName = uploadResult.ObjectName
+            });
         }
 
-        // Helper method to populate the list of restaurants for the dropdown
+        // Loads restaurants to populate the Create page dropdown.
         private async Task PopulateRestaurantsAsync(MenuUploadViewModel model)
         {
             var restaurants = await _firestoreMenuRepository.GetRestaurantsAsync();

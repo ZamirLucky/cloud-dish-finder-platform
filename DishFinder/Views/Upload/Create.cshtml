@@ -1,19 +1,19 @@
 ﻿@model DishFinder.Models.MenuUploadViewModel
 
 @{
-    ViewData["Title"] = "Create Menu Upload";
+    ViewData["Title"] = "Upload Menu Images";
 }
 
-<h2>Create Menu Upload</h2>
+<h2>Upload Menu Images</h2>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
-}
+<div id="messageArea"></div>
 
-<form asp-controller="Upload" asp-action="Create" method="post" enctype="multipart/form-data">
+<form id="uploadForm"
+      method="post"
+      enctype="multipart/form-data"
+      data-start-upload-url="@Url.Action("StartMenuUpload", "Upload")"
+      data-upload-single-url="@Url.Action("UploadSingleImage", "Upload")">
+    @Html.AntiForgeryToken()
     <div class="mb-3">
         <label asp-for="RestaurantId" class="form-label"></label>
         <select asp-for="RestaurantId" asp-items="Model.Restaurants" class="form-select">
@@ -31,6 +31,7 @@
     <div class="mb-3">
         <label asp-for="MenuImages" class="form-label"></label>
         <input asp-for="MenuImages"
+               id="menuImages"
                type="file"
                class="form-control"
                accept=".jpg,.jpeg,.png,.gif"
@@ -38,11 +39,17 @@
         <span asp-validation-for="MenuImages" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Continue</button>
+    <button type="submit" class="btn btn-primary">Upload</button>
 </form>
+
+<hr />
+
+<div id="progressContainer"></div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script src="~/js/upload-create.js" asp-append-version="true"></script>
 }
