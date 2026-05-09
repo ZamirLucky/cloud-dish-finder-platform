@@ -10,18 +10,22 @@ namespace DishFinder.Controllers
         private readonly IBucketStorageService _bucketStorageService;
         private readonly IFirestoreMenuRepository _firestoreMenuRepository;
         private readonly IPubSubPublisherService _pubSubPublisherService;
+        private readonly ITranslationCacheService _translationCacheService;
         private readonly ILogger<UploadController> _logger;
+
 
         public UploadController(
             IFirestoreMenuRepository firestoreMenuRepository, 
             ILogger<UploadController> logger,
             IBucketStorageService bucketStorageService,
-            IPubSubPublisherService pubSubPublisherService)
+            IPubSubPublisherService pubSubPublisherService,
+            ITranslationCacheService translationCacheService)
         {
             _firestoreMenuRepository = firestoreMenuRepository;
             _logger = logger;
             _bucketStorageService = bucketStorageService;
             _pubSubPublisherService = pubSubPublisherService;
+            _translationCacheService = translationCacheService;
         }
 
         // GET: Upload/Create (renders the upload page and restaurant dropdown)
@@ -42,7 +46,10 @@ namespace DishFinder.Controllers
             if (!ModelState.IsValid){
                     return BadRequest(new { success = false, message = "Invalid menu upload request." });
             }
-            
+
+            // Invalidate cache on upload
+            await _translationCacheService.InvalidateRestaurantAsync(model.RestaurantId);
+
             string menuId = Guid.NewGuid().ToString("N");
 
             await _firestoreMenuRepository.CreateOrUpdateMenuAsync(

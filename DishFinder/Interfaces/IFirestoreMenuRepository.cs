@@ -24,5 +24,9 @@ namespace DishFinder.Interfaces
             string uploadedBy);
 
         Task<List<RestaurantOptionViewModel>> GetRestaurantsAsync();
+
+        Task<List<CatalogMenuItemViewModel>> GetConfirmedCatalogItemsAsync(
+            string? searchTerm,
+            string? sortOrder);
     }
 }

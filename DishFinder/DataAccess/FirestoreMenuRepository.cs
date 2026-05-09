@@ -1,6 +1,7 @@
 ﻿using DishFinder.Interfaces;
 using DishFinder.Models;
 using Google.Cloud.Firestore;
+using System.Globalization;
 
 namespace DishFinder.DataAccess
 {
@@ -167,6 +168,164 @@ namespace DishFinder.DataAccess
             }
 
             return restaurants;
+        }
+
+        //
+        public async Task<List<CatalogMenuItemViewModel>> GetConfirmedCatalogItemsAsync(
+            string? searchTerm,
+            string? sortOrder)
+        {
+            var results = new List<CatalogMenuItemViewModel>();
+            var restaurantNameCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            QuerySnapshot menusSnapshot = await _db
+                .CollectionGroup("menus")
+                .WhereEqualTo("status", "confirmed")
+                .GetSnapshotAsync();
+
+            foreach (DocumentSnapshot menuDoc in menusSnapshot.Documents)
+            {
+                string menuId = menuDoc.Id;
+                string restaurantId = menuDoc.Reference.Parent.Parent?.Id ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(restaurantId))
+                {
+                    continue;
+                }
+
+                string restaurantName = await GetRestaurantNameAsync(restaurantId, restaurantNameCache);
+
+                string? menuTitle = menuDoc.ContainsField("menuTitle")
+                    ? menuDoc.GetValue<string>("menuTitle")
+                    : null;
+
+                Dictionary<string, object> menuData = menuDoc.ToDictionary();
+
+                if (!menuData.TryGetValue("parsedItems", out object? parsedItemsObj) ||
+                    parsedItemsObj is not IEnumerable<object> parsedItemsList)
+                {
+                    continue;
+                }
+
+                foreach (object parsedItemObj in parsedItemsList)
+                {
+                    if (parsedItemObj is not IDictionary<string, object> itemMap)
+                    {
+                        continue;
+                    }
+
+                    string itemName = GetString(itemMap, "name") ?? string.Empty;
+
+                    if (string.IsNullOrWhiteSpace(itemName))
+                    {
+                        continue;
+                    }
+
+                    decimal? priceValue = GetDecimal(itemMap, "priceValue");
+                    string? priceText = GetString(itemMap, "priceText");
+
+                    results.Add(new CatalogMenuItemViewModel
+                    {
+                        RestaurantId = restaurantId,
+                        RestaurantName = restaurantName,
+                        MenuId = menuId,
+                        MenuTitle = menuTitle,
+                        ItemName = itemName,
+                        Description = GetString(itemMap, "description"),
+                        Section = GetString(itemMap, "section") ?? "UNCATEGORISED",
+                        PriceText = priceText ?? (priceValue.HasValue ? $"€{priceValue.Value:0.00}" : string.Empty),
+                        PriceValue = priceValue,
+                        NormalizedName = GetString(itemMap, "normalizedName") ?? itemName.ToLowerInvariant()
+                    });
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                string term = searchTerm.Trim().ToLowerInvariant();
+
+                results = results
+                    .Where(x =>
+                        x.ItemName.ToLowerInvariant().Contains(term) ||
+                        (x.Description?.ToLowerInvariant().Contains(term) ?? false) ||
+                        x.RestaurantName.ToLowerInvariant().Contains(term) ||
+                        (x.Section?.ToLowerInvariant().Contains(term) ?? false) ||
+                        (x.MenuTitle?.ToLowerInvariant().Contains(term) ?? false))
+                    .ToList();
+            }
+
+            results = (sortOrder ?? "price_asc").ToLowerInvariant() switch
+            {
+                "price_desc" => results
+                    .OrderBy(x => x.PriceValue.HasValue ? 0 : 1)
+                    .ThenByDescending(x => x.PriceValue)
+                    .ThenBy(x => x.ItemName)
+                    .ToList(),
+
+                _ => results
+                    .OrderBy(x => x.PriceValue.HasValue ? 0 : 1)
+                    .ThenBy(x => x.PriceValue)
+                    .ThenBy(x => x.ItemName)
+                    .ToList()
+            };
+
+            return results;
+        }
+
+
+        // 
+        private async Task<string> GetRestaurantNameAsync(
+            string restaurantId,
+            Dictionary<string, string> cache)
+        {
+            if (cache.TryGetValue(restaurantId, out string? cachedName))
+            {
+                return cachedName;
+            }
+
+            DocumentSnapshot restaurantDoc = await _db
+                .Collection("restaurants")
+                .Document(restaurantId)
+                .GetSnapshotAsync();
+
+            string restaurantName =
+                restaurantDoc.Exists && restaurantDoc.ContainsField("name")
+                    ? restaurantDoc.GetValue<string>("name")
+                    : restaurantId;
+
+            cache[restaurantId] = restaurantName;
+            return restaurantName;
+        }
+
+        // 
+        private static string? GetString(IDictionary<string, object> map, string key)
+        {
+            if (!map.TryGetValue(key, out object? value) || value is null)
+            {
+                return null;
+            }
+
+            return value.ToString();
+        }
+
+        // 
+        private static decimal? GetDecimal(IDictionary<string, object> map, string key)
+        {
+            if (!map.TryGetValue(key, out object? value) || value is null)
+            {
+                return null;
+            }
+
+            return value switch
+            {
+                decimal d => d,
+                double d => Convert.ToDecimal(d, CultureInfo.InvariantCulture),
+                float f => Convert.ToDecimal(f, CultureInfo.InvariantCulture),
+                long l => l,
+                int i => i,
+                string s when decimal.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsed) => parsed,
+                _ => null
+            };
         }
     }
 }

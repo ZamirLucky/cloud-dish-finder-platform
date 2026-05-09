@@ -62,6 +62,17 @@ builder.Services.AddSingleton(provider =>
 builder.Services.AddScoped<IBucketStorageService, BucketStorageService>();
 builder.Services.AddScoped<IFirestoreMenuRepository, FirestoreMenuRepository>();
 builder.Services.AddScoped<IPubSubPublisherService, PubSubPublisherService>();
+builder.Services.AddSingleton<ITranslationCacheService, RedisTranslationCacheService>();
+builder.Services.AddScoped<IMenuTranslationService, MenuTranslationService>();
+
+builder.Services.AddHttpClient("TranslateMenuItem", client =>
+{
+    string url = builder.Configuration["CloudFunctions:TranslateMenuItemUrl"]
+        ?? throw new InvalidOperationException("Missing CloudFunctions:TranslateMenuItemUrl");
+
+    client.BaseAddress = new Uri(url);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 var app = builder.Build();
 
