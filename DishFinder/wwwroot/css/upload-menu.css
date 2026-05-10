@@ -1,0 +1,359 @@
+/* Upload menu page styles */
+
+.upload-page {
+    --upload-border: #e5e7eb;
+    --upload-muted: #6b7280;
+    --upload-ink: #111827;
+    --upload-soft: #f8fafc;
+    --upload-primary: #0d6efd;
+    --upload-success: #198754;
+    padding-bottom: 1rem;
+}
+
+/* Top page banner. */
+.upload-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 54%, #0284c7 100%);
+    border-radius: 1.25rem;
+    color: #ffffff;
+    padding: 2rem;
+    box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.18);
+    margin-bottom: 1.5rem;
+}
+
+.upload-hero h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    margin-bottom: .5rem;
+}
+
+.upload-hero p {
+    color: rgba(255, 255, 255, .84);
+    max-width: 780px;
+    margin-bottom: 0;
+}
+
+/* Main two-column layout: upload form and help card. */
+.upload-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.upload-card,
+.upload-side-card,
+.upload-progress-card {
+    background: #ffffff;
+    border: 1px solid var(--upload-border);
+    border-radius: 1rem;
+    box-shadow: 0 .75rem 1.75rem rgba(15, 23, 42, .06);
+}
+
+.upload-card-header,
+.upload-progress-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--upload-border);
+    background: var(--upload-soft);
+}
+
+.upload-card-title {
+    margin: 0;
+    color: var(--upload-ink);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.upload-card-subtitle {
+    color: var(--upload-muted);
+    font-size: .92rem;
+    margin-top: .2rem;
+}
+
+.upload-card-body {
+    padding: 1.25rem;
+}
+
+.upload-label {
+    color: #374151;
+    font-weight: 700;
+    margin-bottom: .45rem;
+}
+
+.upload-hint {
+    color: var(--upload-muted);
+    font-size: .88rem;
+    margin-top: .4rem;
+}
+
+/* Drag/drop area. The real file input is visually hidden below. */
+.upload-dropzone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    border: 2px dashed #bfdbfe;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, #f8fbff 0%, #eff6ff 100%);
+    cursor: pointer;
+    padding: 1.5rem;
+    transition: border-color .15s ease, background-color .15s ease, transform .15s ease;
+}
+
+.upload-dropzone:hover,
+.upload-dropzone.is-dragging {
+    border-color: var(--upload-primary);
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+.upload-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.dropzone-inner {
+    text-align: center;
+    max-width: 520px;
+}
+
+.dropzone-icon {
+    width: 58px;
+    height: 58px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: .8rem;
+}
+
+.dropzone-title {
+    color: var(--upload-ink);
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-bottom: .25rem;
+}
+
+.dropzone-text {
+    color: var(--upload-muted);
+    margin-bottom: .9rem;
+}
+
+/* Selected file preview shown after the user chooses photos. */
+.selected-files-card {
+    display: none;
+    margin-top: 1rem;
+    border: 1px solid var(--upload-border);
+    border-radius: .9rem;
+    overflow: hidden;
+}
+
+.selected-files-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem 1rem;
+    background: var(--upload-soft);
+    border-bottom: 1px solid var(--upload-border);
+    font-weight: 800;
+    color: var(--upload-ink);
+}
+
+.selected-file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.selected-file-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #374151;
+    font-size: .92rem;
+}
+
+.selected-file-list li:last-child {
+    border-bottom: 0;
+}
+
+.file-size-text {
+    color: var(--upload-muted);
+    white-space: nowrap;
+}
+
+.upload-actions {
+    display: flex;
+    gap: .75rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 1.25rem;
+}
+
+/* Right-side explanation card. */
+.upload-side-card {
+    padding: 1.25rem;
+}
+
+.upload-side-card h2 {
+    color: var(--upload-ink);
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: .75rem;
+}
+
+.upload-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: .75rem;
+}
+
+.upload-checklist li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .65rem;
+    color: #4b5563;
+    font-size: .93rem;
+    line-height: 1.4;
+}
+
+.check-dot {
+    width: 1.35rem;
+    height: 1.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: .82rem;
+    font-weight: 800;
+    margin-top: .1rem;
+}
+
+/* Upload progress card populated by upload-menu.js. */
+.upload-progress-card {
+    margin-top: 1.5rem;
+    overflow: hidden;
+}
+
+.upload-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.progress-status-badge {
+    border-radius: 999px;
+    padding: .35rem .75rem;
+    background: #eef2ff;
+    color: #3730a3;
+    font-size: .82rem;
+    font-weight: 800;
+}
+
+.upload-progress-body {
+    padding: 1.25rem;
+}
+
+#messageArea:not(:empty) {
+    margin-bottom: 1rem;
+}
+
+#progressContainer:empty::before {
+    content: "Your upload progress will appear here after you start.";
+    display: block;
+    color: var(--upload-muted);
+    background: #f8fafc;
+    border: 1px dashed var(--upload-border);
+    border-radius: .85rem;
+    padding: 1rem;
+}
+
+.upload-progress-row {
+    margin-bottom: 1rem;
+}
+
+.upload-progress-file-name {
+    color: var(--upload-ink);
+    font-weight: 800;
+    margin-bottom: .45rem;
+    word-break: break-word;
+}
+
+.upload-progress-bar-shell {
+    height: 24px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e5e7eb;
+}
+
+.upload-progress-bar {
+    width: 0%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg, #0d6efd, #0284c7);
+    color: #ffffff;
+    font-size: .82rem;
+    font-weight: 800;
+    transition: width .2s ease;
+}
+
+.upload-progress-row.is-complete .upload-progress-bar {
+    background: linear-gradient(90deg, #198754, #10b981);
+}
+
+.upload-progress-row.is-error .upload-progress-bar {
+    background: linear-gradient(90deg, #dc3545, #ef4444);
+}
+
+.upload-progress-status {
+    color: var(--upload-muted);
+}
+
+/* Responsive layout adjustments. */
+@media (max-width: 992px) {
+    .upload-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .upload-side-card {
+        order: -1;
+    }
+}
+
+@media (max-width: 576px) {
+    .upload-hero,
+    .upload-card-body,
+    .upload-side-card,
+    .upload-progress-body {
+        padding: 1rem;
+    }
+
+    .upload-actions .btn {
+        width: 100%;
+    }
+
+    .selected-file-list li {
+        flex-direction: column;
+        gap: .25rem;
+    }
+}

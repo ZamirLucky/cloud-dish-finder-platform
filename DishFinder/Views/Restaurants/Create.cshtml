@@ -1,33 +1,96 @@
-﻿@model DishFinder.Models.RestaurantCreateViewModel
+@model DishFinder.Models.RestaurantCreateViewModel
 
 @{
     ViewData["Title"] = "Create Restaurant";
 }
 
-<h2>Create Restaurant</h2>
+@* Page-specific styling for the restaurant create page *@
+<link rel="stylesheet" href="~/css/restaurant-create.css" asp-append-version="true" />
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
+<div class="restaurant-create-page">
+    <section class="restaurant-hero">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+            <div>
+                <h1>Create a Restaurant</h1>
+                <p>
+                    Add the restaurant first, then upload menu photos for it. This helps keep menus, dishes, and prices organised in the catalog.
+                </p>
+            </div>
+            <div class="align-self-lg-end">
+                <span class="badge rounded-pill text-bg-light px-3 py-2">Restaurant setup</span>
+            </div>
+        </div>
+    </section>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success restaurant-alert" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="restaurant-create-grid">
+        @* Main form *@
+        <section class="restaurant-card">
+            <div class="restaurant-card-header">
+                <h2 class="restaurant-card-title">Restaurant details</h2>
+                <div class="restaurant-card-subtitle">Enter the basic information customers will recognise in search results.</div>
+            </div>
+
+            <div class="restaurant-card-body">
+                <form asp-controller="Restaurants" asp-action="Create" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Name" class="form-label restaurant-label">Restaurant name</label>
+                        <input asp-for="Name"
+                               class="form-control form-control-lg"
+                               placeholder="e.g. Trabuxu Bistro"
+                               autocomplete="organization" />
+                        <div class="restaurant-hint">Use the public name shown on the restaurant menu or storefront.</div>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Address" class="form-label restaurant-label">Address</label>
+                        <input asp-for="Address"
+                               class="form-control form-control-lg"
+                               placeholder="e.g. 8 South Street, Valletta"
+                               autocomplete="street-address" />
+                        <div class="restaurant-hint">Add enough detail to distinguish restaurants with similar names.</div>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <div class="restaurant-actions">
+                        <button type="submit" class="btn btn-primary btn-lg px-4">Save restaurant</button>
+                        <a asp-controller="Upload" asp-action="Create" class="btn btn-outline-secondary btn-lg px-4">Upload menu</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        @* User-facing guidance shown beside the form. *@
+        <aside class="restaurant-side-card">
+            <h2>What happens next?</h2>
+            <ul class="restaurant-checklist">
+                <li>
+                    <span class="check-dot">1</span>
+                    <span>The restaurant is saved and can be selected on the upload page.</span>
+                </li>
+                <li>
+                    <span class="check-dot">2</span>
+                    <span>Menu photos uploaded for this restaurant are linked to it.</span>
+                </li>
+                <li>
+                    <span class="check-dot">3</span>
+                    <span>After processing, its dishes and prices can appear in the catalog.</span>
+                </li>
+            </ul>
+        </aside>
     </div>
-}
-
-<form asp-controller="Restaurants" asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Address" class="form-label"></label>
-        <input asp-for="Address" class="form-control" />
-        <span asp-validation-for="Address" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Create Restaurant</button>
-</form>
+</div>
 
 @section Scripts {
     @{
