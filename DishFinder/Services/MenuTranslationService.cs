@@ -33,6 +33,8 @@ namespace DishFinder.Services
             _logger = logger;
         }
 
+        // Checks the Redis cache for an existing translation.
+        // If not found, calls the translate-menu-item Cloud Run function, caches the result, and returns it.
         public async Task<CachedTranslationResultModel> TranslateAsync(
             string restaurantId,
             string menuId,
@@ -68,18 +70,25 @@ namespace DishFinder.Services
 
             var client = _httpClientFactory.CreateClient("TranslateMenuItem");
 
+            //bool requireAuth =
+            //    !string.Equals(
+            //        _configuration["CloudFunctions:TranslateMenuItemRequireAuth"],
+            //        "false",
+            //        StringComparison.OrdinalIgnoreCase);
             bool requireAuth =
-                !string.Equals(
-                    _configuration["CloudFunctions:TranslateMenuItemRequireAuth"],
-                    "false",
-                    StringComparison.OrdinalIgnoreCase);
+                _configuration.GetValue<bool>("CloudFunctions:TranslateMenuItemRequireAuth");
 
+            // If the Cloud Run service requires authentication, get an ID token and set the Authorization header
             if (requireAuth)
             {
                 string idToken = await GetIdTokenAsync(serviceUrl);
 
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", idToken);
+            }
+            else
+            {
+                client.DefaultRequestHeaders.Authorization = null;
             }
 
             object requestBody = string.IsNullOrWhiteSpace(sourceLanguage)
@@ -143,6 +152,7 @@ namespace DishFinder.Services
             return result;
         }
 
+        // Gets an ID token for authenticating to the Cloud Run service, if required.
         private static async Task<string> GetIdTokenAsync(string audience)
         {
             GoogleCredential credential = await GoogleCredential.GetApplicationDefaultAsync();
@@ -152,6 +162,7 @@ namespace DishFinder.Services
             return await oidcToken.GetAccessTokenAsync();
         }
 
+        // Model for deserializing the response from the translate-menu-item Cloud Function
         private sealed class TranslateFunctionResponse
         {
             public bool Success { get; set; }

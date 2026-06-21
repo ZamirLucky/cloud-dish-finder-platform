@@ -1,10 +1,12 @@
 ﻿using DishFinder.Interfaces;
 using DishFinder.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace DishFinder.Controllers
 {
+    [Authorize]
     public class UploadController : Controller
     {
         private readonly IBucketStorageService _bucketStorageService;

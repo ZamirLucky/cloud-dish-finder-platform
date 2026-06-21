@@ -4,7 +4,4 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="DishFinder/DishFinder.csproj" />
-  <Project Path="OcrFunction/OcrFunction.csproj" />
-  <Project Path="Shared/Shared.csproj" />
-  <Project Path="TranslateFunction/TranslateFunction.csproj" />
 </Solution>
