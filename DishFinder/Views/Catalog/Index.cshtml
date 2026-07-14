@@ -1,0 +1,204 @@
+@model DishFinder.Models.CatalogIndexViewModel
+
+@{
+    ViewData["Title"] = "Catalog";
+
+    var totalItems = Model.Items?.Count ?? 0;
+    var restaurantCount = Model.Items?
+        .Where(x => !string.IsNullOrWhiteSpace(x.RestaurantName))
+        .Select(x => x.RestaurantName)
+        .Distinct()
+        .Count() ?? 0;
+    var menuCount = Model.Items?
+        .Where(x => !string.IsNullOrWhiteSpace(x.MenuTitle))
+        .Select(x => $"{x.RestaurantId}:{x.MenuId}")
+        .Distinct()
+        .Count() ?? 0;
+    var hasSearch = !string.IsNullOrWhiteSpace(Model.SearchTerm);
+}
+
+@* Page-specific styles css *@
+<link rel="stylesheet" href="~/css/catalog.css" asp-append-version="true" />
+
+<div class="catalog-page">
+    <section class="catalog-hero">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+            <div>
+                <h1>Catalog</h1>
+                <p>
+                    Search confirmed restaurant menu items, compare prices, and translate visible menu details directly from the catalog.
+                </p>
+            </div>
+            <div class="align-self-lg-end">
+                <span class="badge rounded-pill text-bg-light px-3 py-2">Confirmed menu entries</span>
+            </div>
+        </div>
+    </section>
+
+    @* Small summary cards for the currently displayed results. *@
+    <section class="catalog-stat-grid" aria-label="Catalog summary">
+        <div class="catalog-stat-card">
+            <div class="catalog-stat-label">Items shown</div>
+            <div class="catalog-stat-value">@totalItems</div>
+        </div>
+        <div class="catalog-stat-card">
+            <div class="catalog-stat-label">Restaurants</div>
+            <div class="catalog-stat-value">@restaurantCount</div>
+        </div>
+        <div class="catalog-stat-card">
+            <div class="catalog-stat-label">Menus</div>
+            <div class="catalog-stat-value">@menuCount</div>
+        </div>
+    </section>
+
+    @* Search and price sorting are handled by the Catalog/Index GET action. *@
+    <form method="get" asp-controller="Catalog" asp-action="Index" class="catalog-filter-card">
+        <div class="catalog-filter-grid">
+            <div>
+                <label for="searchTerm" class="form-label catalog-label">Search</label>
+                <input id="searchTerm"
+                       class="form-control form-control-lg"
+                       type="text"
+                       name="searchTerm"
+                       value="@Model.SearchTerm"
+                       placeholder="Search pasta, burger, steak, section, restaurant..." />
+            </div>
+
+            <div>
+                <label for="sortOrder" class="form-label catalog-label">Sort by price</label>
+                <select id="sortOrder" name="sortOrder" class="form-select form-select-lg">
+                    <option value="price_asc" selected="@(Model.SortOrder == "price_asc" || string.IsNullOrWhiteSpace(Model.SortOrder))">Lowest price first</option>
+                    <option value="price_desc" selected="@(Model.SortOrder == "price_desc")">Highest price first</option>
+                </select>
+            </div>
+
+            <div>
+                <button type="submit" class="btn btn-primary btn-lg px-4">Apply</button>
+            </div>
+
+            <div>
+                <a asp-controller="Catalog" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    @* The external JavaScript reads the anti-forgery token and endpoint from the form *@
+    <form id="antiForgeryForm"
+          method="post"
+          data-translate-url="@Url.Action("TranslateItem", "Catalog")">
+        @Html.AntiForgeryToken()
+    </form>
+
+    @if (Model.Items?.Any() != true)
+    {
+        <section class="empty-state-card">
+            <h3>No confirmed menu items found</h3>
+            @if (hasSearch)
+            {
+                <p>No results matched “@Model.SearchTerm”. Try a different dish, section, menu, or restaurant name.</p>
+            }
+            else
+            {
+                <p>Once uploaded menus are processed and marked as ready, they will appear here.</p>
+            }
+        </section>
+    }
+    else
+    {
+        @* Results table. Each row contains data attributes used by catalog.js for translation/reset. *@
+        <section class="catalog-table-card">
+            <div class="catalog-table-header">
+                <div>
+                    <h2 class="catalog-table-title">Menu results</h2>
+                    <div class="catalog-table-subtitle">
+                        Showing @totalItems confirmed @(totalItems == 1 ? "entry" : "entries")
+                        @if (hasSearch)
+                        {
+                            <span>for “@Model.SearchTerm”</span>
+                        }
+                    </div>
+                </div>
+                <div class="text-muted small d-none d-md-block">Use the language controls per row</div>
+            </div>
+
+            <div class="table-responsive catalog-table-wrapper">
+                <table class="table catalog-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Restaurant</th>
+                            <th>Menu</th>
+                            <th>Section</th>
+                            <th>Item</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Translate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="restaurant-name">@item.RestaurantName</div>
+                                    <div class="text-muted small">Restaurant</div>
+                                </td>
+                                <td>
+                                    <span class="menu-title-text" data-original-text="@item.MenuTitle">
+                                        @item.MenuTitle
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="section-badge section-text" data-original-text="@item.Section">
+                                        @item.Section
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="item-name-text" data-original-text="@item.ItemName">
+                                        @item.ItemName
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="description-text" data-original-text="@(item.Description ?? "")">
+                                        @(string.IsNullOrWhiteSpace(item.Description) ? "-" : item.Description)
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="price-pill">@item.PriceText</span>
+                                </td>
+                                <td class="translate-cell">
+                                    <div class="translation-panel">
+                                        <select class="form-select language-select" aria-label="Select translation language">
+                                            <option value="it">Italian</option>
+                                            <option value="fr">French</option>
+                                            <option value="de">German</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="mt">Maltese</option>
+                                            <option value="en">English</option>
+                                            <option value="so">Somali</option>
+                                        </select>
+
+                                        <button type="button"
+                                                class="btn btn-primary translate-btn"
+                                                data-restaurant-id="@item.RestaurantId"
+                                                data-menu-id="@item.MenuId">
+                                            <span class="translate-label">Translate</span>
+                                            <span class="translate-loading d-none">Translating...</span>
+                                        </button>
+
+                                        <button type="button" class="btn btn-outline-secondary reset-btn">Reset</button>
+                                        <div class="translation-result" aria-live="polite"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+</div>
+
+@section Scripts {
+    @* Page-specific behaviour js *@
+    <script src="~/js/catalog.js" asp-append-version="true"></script>
+}

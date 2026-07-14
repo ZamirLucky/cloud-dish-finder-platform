@@ -1,0 +1,145 @@
+@model DishFinder.Models.MenuUploadViewModel
+
+@{
+    ViewData["Title"] = "Upload a Restaurant Menu";
+    var restaurantCount = Model.Restaurants?.Count() ?? 0;
+}
+
+@* Page-specific upload styling *@
+<link rel="stylesheet" href="~/css/upload-menu.css" asp-append-version="true" />
+
+<div class="upload-page">
+    <section class="upload-hero">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+            <div>
+                <h1>Upload a Restaurant Menu</h1>
+                <p>
+                    Choose a restaurant and upload clear photos of its menu. After processing is complete, the dishes and prices will appear in the catalog.
+                </p>
+            </div>
+            <div class="align-self-lg-end">
+                <span class="badge rounded-pill text-bg-light px-3 py-2">Menu upload</span>
+            </div>
+        </div>
+    </section>
+
+    @* validation and result messages *@
+    <div id="messageArea"></div>
+
+    <div class="upload-grid">
+        @* Main upload form and the data URLs are used by upload-menu.js. *@
+        <section class="upload-card">
+            <div class="upload-card-header">
+                <h2 class="upload-card-title">Menu information</h2>
+                <div class="upload-card-subtitle">Select the restaurant, give the menu a name, and choose the menu photos to upload.</div>
+            </div>
+
+            <div class="upload-card-body">
+                <form id="uploadForm"
+                      method="post"
+                      enctype="multipart/form-data"
+                      data-start-upload-url="@Url.Action("StartMenuUpload", "Upload")"
+                      data-upload-single-url="@Url.Action("UploadSingleImage", "Upload")">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-4">
+                        <label asp-for="RestaurantId" class="form-label upload-label"></label>
+                        <select asp-for="RestaurantId" asp-items="Model.Restaurants" class="form-select form-select-lg">
+                            <option value="">Select a restaurant</option>
+                        </select>
+                        <div class="upload-hint">Restaurants available: @restaurantCount</div>
+                        <span asp-validation-for="RestaurantId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MenuTitle" class="form-label upload-label"></label>
+                        <input asp-for="MenuTitle"
+                               class="form-control form-control-lg"
+                               placeholder="e.g. Dinner menu, Lunch specials, Drinks menu" />
+                        <div class="upload-hint">Use a title that will help you recognise this menu later.</div>
+                        <span asp-validation-for="MenuTitle" class="text-danger"></span>
+                    </div>
+
+                    @* The visible dropzone triggers the hidden file input below. *@
+                    <div class="mb-3">
+                        <label asp-for="MenuImages" class="form-label upload-label"></label>
+
+                        <label class="upload-dropzone" for="menuImages" id="uploadDropzone">
+                            <span class="dropzone-inner">
+                                <span class="dropzone-icon">↑</span>
+                                <span class="dropzone-title d-block">Choose or drag menu photos here</span>
+                                <span class="dropzone-text d-block">You can select more than one photo. Supported formats: JPG, JPEG, PNG, and GIF.</span>
+                                <span class="btn btn-outline-primary px-4">Browse photos</span>
+                            </span>
+                        </label>
+
+                        <input asp-for="MenuImages"
+                               id="menuImages"
+                               type="file"
+                               class="form-control upload-file-input"
+                               accept=".jpg,.jpeg,.png,.gif"
+                               multiple />
+
+                        <span asp-validation-for="MenuImages" class="text-danger"></span>
+
+                        @* Populated by JavaScript after the user selects files. *@
+                        <div class="selected-files-card" id="selectedFilesCard">
+                            <div class="selected-files-header">
+                                <span>Selected photos</span>
+                                <span id="selectedFilesSummary">0 photos</span>
+                            </div>
+                            <ul class="selected-file-list" id="selectedFilesList"></ul>
+                        </div>
+                    </div>
+
+                    <div class="upload-actions">
+                        <button type="submit" class="btn btn-primary btn-lg px-4">Upload menu</button>
+                        <button type="reset" class="btn btn-outline-secondary btn-lg px-4" id="clearSelectionBtn">Clear form</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        @* Simple user-facing summary of what happens after upload. *@
+        <aside class="upload-side-card">
+            <h2>After you upload</h2>
+            <ul class="upload-checklist">
+                <li>
+                    <span class="check-dot">1</span>
+                    <span>Your menu photos are saved and linked to the selected restaurant.</span>
+                </li>
+                <li>
+                    <span class="check-dot">2</span>
+                    <span>The system reads the text from the menu photos.</span>
+                </li>
+                <li>
+                    <span class="check-dot">3</span>
+                    <span>When processing is complete, dishes and prices can be searched in the catalog.</span>
+                </li>
+            </ul>
+        </aside>
+    </div>
+
+    @* Per-file progress rows are inserted into progressContainer by upload-menu.js. *@
+    <section class="upload-progress-card" aria-label="Upload status">
+        <div class="upload-progress-header">
+            <div>
+                <h2 class="upload-card-title">Upload status</h2>
+                <div class="upload-card-subtitle">You will see the upload progress for each selected photo here.</div>
+            </div>
+            <span class="progress-status-badge">Live progress</span>
+        </div>
+        <div class="upload-progress-body">
+            <div id="progressContainer"></div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    @* Page-specific upload behaviour: file preview, drag/drop, and progress updates. *@
+    <script src="~/js/upload-menu.js" asp-append-version="true"></script>
+}

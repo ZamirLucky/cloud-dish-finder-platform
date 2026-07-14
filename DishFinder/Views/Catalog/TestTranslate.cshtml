@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Test Translate";
+}
+
+<h2>Test Translate</h2>
+
+<form asp-controller="Catalog" asp-action="TranslateItem" method="post">
+    @Html.AntiForgeryToken()
+
+    <div>
+        <label>Restaurant Id</label>
+        <input name="restaurantId" value="rubino-valletta-triq-12" />
+    </div>
+
+    <div>
+        <label>Menu Id</label>
+        <input name="menuId" value="43d23bb25d7c49ea9a1274b27cbf2a13" />
+    </div>
+
+    <div>
+        <label>Item Name</label>
+        <input name="itemName" value="Tuna Tartare" />
+    </div>
+
+    <div>
+        <label>Target Language</label>
+        <input name="targetLanguage" value="it" />
+    </div>
+
+    <div>
+        <label>Source Language</label>
+        <input name="sourceLanguage" value="en" />
+    </div>
+
+    <button type="submit">Translate</button>
+</form>

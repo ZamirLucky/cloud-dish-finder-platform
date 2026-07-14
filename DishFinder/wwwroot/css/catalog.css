@@ -1,0 +1,264 @@
+/* Catalog page design tokens and page spacing. */
+.catalog-page {
+    --catalog-border: #e5e7eb;
+    --catalog-muted: #6b7280;
+    --catalog-ink: #111827;
+    --catalog-soft: #f8fafc;
+    --catalog-primary: #0d6efd;
+    --catalog-success: #198754;
+    padding-bottom: 1rem;
+}
+
+/* Top page banner. */
+.catalog-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 54%, #0284c7 100%);
+    border-radius: 1.25rem;
+    color: #ffffff;
+    padding: 2rem;
+    box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.18);
+    margin-bottom: 1.5rem;
+}
+
+.catalog-hero h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    margin-bottom: .5rem;
+}
+
+.catalog-hero p {
+    color: rgba(255, 255, 255, .84);
+    max-width: 760px;
+    margin-bottom: 0;
+}
+
+/* Summary cards above the search controls. */
+.catalog-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.catalog-stat-card,
+.catalog-filter-card,
+.catalog-table-card,
+.empty-state-card {
+    background: #ffffff;
+    border: 1px solid var(--catalog-border);
+    border-radius: 1rem;
+    box-shadow: 0 .75rem 1.75rem rgba(15, 23, 42, .06);
+}
+
+.catalog-stat-card {
+    padding: 1rem 1.25rem;
+}
+
+.catalog-stat-label {
+    color: var(--catalog-muted);
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: .2rem;
+}
+
+.catalog-stat-value {
+    color: var(--catalog-ink);
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+/* Search and sort controls. */
+.catalog-filter-card {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.catalog-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(200px, 260px) auto auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.catalog-label {
+    color: #374151;
+    font-weight: 700;
+    margin-bottom: .4rem;
+}
+
+/* Results table container. */
+.catalog-table-card {
+    overflow: hidden;
+}
+
+.catalog-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--catalog-border);
+    background: var(--catalog-soft);
+}
+
+.catalog-table-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--catalog-ink);
+}
+
+.catalog-table-subtitle {
+    color: var(--catalog-muted);
+    font-size: .9rem;
+}
+
+.catalog-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.catalog-table {
+    min-width: 1120px;
+}
+
+.catalog-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #ffffff;
+    color: #374151;
+    border-bottom: 1px solid var(--catalog-border);
+    font-size: .78rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.catalog-table tbody tr {
+    transition: background-color .15s ease, box-shadow .15s ease;
+}
+
+.catalog-table tbody tr:hover {
+    background: #f9fbff;
+}
+
+/* Row content styling. */
+.restaurant-name {
+    font-weight: 800;
+    color: var(--catalog-ink);
+}
+
+.menu-title-text,
+.section-text,
+.item-name-text,
+.description-text {
+    overflow-wrap: anywhere;
+}
+
+.section-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: .25rem .6rem;
+    background: #eef2ff;
+    color: #3730a3;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.item-name-text {
+    display: inline-block;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.35;
+}
+
+.description-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: #4b5563;
+    max-width: 560px;
+    line-height: 1.45;
+}
+
+.price-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 74px;
+    border-radius: 999px;
+    padding: .35rem .75rem;
+    background: #ecfdf5;
+    color: #047857;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* Per-row translation controls. */
+.translate-cell {
+    width: 190px;
+}
+
+.translation-panel {
+    display: grid;
+    gap: .5rem;
+    min-width: 160px;
+}
+
+.translation-result {
+    min-height: 1.25rem;
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--catalog-muted);
+}
+
+.translation-result.success {
+    color: var(--catalog-success);
+}
+
+.translation-result.error {
+    color: #dc3545;
+}
+
+.translation-result.working {
+    color: var(--catalog-primary);
+}
+
+/* Empty search/results state. */
+.empty-state-card {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+}
+
+.empty-state-card h3 {
+    font-weight: 800;
+    color: var(--catalog-ink);
+    margin-bottom: .5rem;
+}
+
+.empty-state-card p {
+    color: var(--catalog-muted);
+    margin-bottom: 0;
+}
+
+/* Responsive layout adjustments. */
+@media (max-width: 992px) {
+    .catalog-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .catalog-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .catalog-filter-grid .btn {
+        width: 100%;
+    }
+}

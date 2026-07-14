@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+   <OutputType>Exe</OutputType>
+   <TargetFramework>net8.0</TargetFramework>
+   <Nullable>enable</Nullable>
+ </PropertyGroup>
+
+ <ItemGroup>
+   <PackageReference Include="Google.Cloud.Firestore" Version="4.2.0" />
+   <PackageReference Include="Google.Cloud.Functions.Hosting" Version="2.2.1" />
+ </ItemGroup>
+</Project>
